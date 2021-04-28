@@ -24,7 +24,7 @@ metadata:
 data:
   # Enable the CSI driver.
   # To run the non-default version of the CSI driver, see the override-able image properties in operator.yaml
-  ROOK_CSI_ENABLE_CEPHFS: "true"
+  ROOK_CSI_ENABLE_CEPHFS: "false"
   # Enable the default version of the CSI RBD driver. To start another version of the CSI driver, see image properties below.
   ROOK_CSI_ENABLE_RBD: "true"
   ROOK_CSI_ENABLE_GRPC_METRICS: "false"
@@ -45,7 +45,7 @@ data:
   # CSI_ENABLE_OMAP_GENERATOR: "false"
 
   # set to false to disable deployment of snapshotter container in CephFS provisioner pod.
-  CSI_ENABLE_CEPHFS_SNAPSHOTTER: "true"
+  CSI_ENABLE_CEPHFS_SNAPSHOTTER: "false"
 
   # set to false to disable deployment of snapshotter container in RBD provisioner pod.
   CSI_ENABLE_RBD_SNAPSHOTTER: "true"
@@ -98,7 +98,7 @@ data:
   # ROOK_CSI_RBD_POD_LABELS: "key1=value1,key2=value2"
 
   # (Optional) Ceph Provisioner NodeAffinity.
-  # CSI_PROVISIONER_NODE_AFFINITY: "role=storage-node; storage=rook, ceph"
+  CSI_PROVISIONER_NODE_AFFINITY: "role=storage-node"
   # (Optional) CEPH CSI provisioner tolerations list. Put here list of taints you want to tolerate in YAML format.
   # CSI provisioner would be best to start on the same nodes as other ceph daemons.
   # CSI_PROVISIONER_TOLERATIONS: |
@@ -109,7 +109,7 @@ data:
   #     key: node-role.kubernetes.io/etcd
   #     operator: Exists
   # (Optional) Ceph CSI plugin NodeAffinity.
-  # CSI_PLUGIN_NODE_AFFINITY: "role=storage-node; storage=rook, ceph"
+  CSI_PLUGIN_NODE_AFFINITY: "role=storage-node"
   # (Optional) CEPH CSI plugin tolerations list. Put here list of taints you want to tolerate in YAML format.
   # CSI plugins need to be started on all the nodes where the clients need to mount the storage.
   # CSI_PLUGIN_TOLERATIONS: |
@@ -284,13 +284,13 @@ data:
   ROOK_ENABLE_FLEX_DRIVER: "false"
   # Whether to start the discovery daemon to watch for raw storage devices on nodes in the cluster.
   # This daemon does not need to run if you are only going to create your OSDs based on StorageClassDeviceSets with PVCs.
-  ROOK_ENABLE_DISCOVERY_DAEMON: "false"
+  ROOK_ENABLE_DISCOVERY_DAEMON: "true"
   # Enable volume replication controller
   CSI_ENABLE_VOLUME_REPLICATION: "false"
   # CSI_VOLUME_REPLICATION_IMAGE: "quay.io/csiaddons/volumereplication-operator:v0.1.0"
 
   # (Optional) Admission controller NodeAffinity.
-  # ADMISSION_CONTROLLER_NODE_AFFINITY: "role=storage-node; storage=rook, ceph"
+  ADMISSION_CONTROLLER_NODE_AFFINITY: "role=storage-node"
   # (Optional) Admission controller tolerations list. Put here list of taints you want to tolerate in YAML format.
   # Admission controller would be best to start on the same nodes as other ceph daemons.
   # ADMISSION_CONTROLLER_TOLERATIONS: |
@@ -321,6 +321,8 @@ spec:
         app: rook-ceph-operator
     spec:
       serviceAccountName: rook-ceph-system
+      nodeSelector:
+        role: storage-node
       containers:
         - name: rook-ceph-operator
           image: rook/ceph:v1.6.2
@@ -358,8 +360,8 @@ spec:
             # - name: AGENT_PRIORITY_CLASS_NAME
             #   value: "<PriorityClassName>"
             # (Optional) Rook Agent NodeAffinity.
-            # - name: AGENT_NODE_AFFINITY
-            #   value: "role=storage-node; storage=rook,ceph"
+            - name: AGENT_NODE_AFFINITY
+              value: "role=storage-node"
             # (Optional) Rook Agent mount security mode. Can by `Any` or `Restricted`.
             # `Any` uses Ceph admin credentials by default/fallback.
             # For using `Restricted` you must have a Ceph secret in each namespace storage should be consumed from and
@@ -396,8 +398,8 @@ spec:
             # - name: DISCOVER_PRIORITY_CLASS_NAME
             #   value: "<PriorityClassName>"
             # (Optional) Discover Agent NodeAffinity.
-            # - name: DISCOVER_AGENT_NODE_AFFINITY
-            #   value: "role=storage-node; storage=rook, ceph"
+            - name: DISCOVER_AGENT_NODE_AFFINITY
+              value: "role=storage-node"
             # (Optional) Discover Agent Pod Labels.
             # - name: DISCOVER_AGENT_POD_LABELS
             #   value: "key1=value1,key2=value2"
@@ -414,13 +416,13 @@ spec:
             # Set this to true if SELinux is enabled (e.g. OpenShift) to workaround the anyuid issues.
             # For more details see https://github.com/rook/rook/issues/1314#issuecomment-355799641
             - name: ROOK_HOSTPATH_REQUIRES_PRIVILEGED
-              value: "false"
+              value: "true"
 
             # In some situations SELinux relabelling breaks (times out) on large filesystems, and doesn't work with cephfs ReadWriteMany volumes (last relabel wins).
             # Disable it here if you have similar issues.
             # For more details see https://github.com/rook/rook/issues/2417
             - name: ROOK_ENABLE_SELINUX_RELABELING
-              value: "true"
+              value: "false"
 
             # In large volumes it will take some time to chown all the files. Disable it here if you have performance issues.
             # For more details see https://github.com/rook/rook/issues/2254
