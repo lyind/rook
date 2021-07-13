@@ -45,7 +45,7 @@ data:
   # CSI_ENABLE_OMAP_GENERATOR need to be enabled when we are using rbd mirroring feature.
   # By default OMAP generator sidecar is deployed with CSI provisioner pod, to disable
   # it set it to false.
-  CSI_ENABLE_OMAP_GENERATOR: "true"
+  CSI_ENABLE_OMAP_GENERATOR: "false"
 
   # set to false to disable deployment of snapshotter container in CephFS provisioner pod.
   CSI_ENABLE_CEPHFS_SNAPSHOTTER: "false"
